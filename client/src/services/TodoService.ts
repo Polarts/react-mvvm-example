@@ -1,4 +1,4 @@
-import Axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
+import Axios, { AxiosResponse } from 'axios';
 import TodoItem from '../models/TodoItem';
 import ServerResponse from './ServerResponseInterface';
 
@@ -29,7 +29,7 @@ export default class TodoService {
             responseType: "json"
         });
 
-        if (response.status != 200) {
+        if (response.status !== 200) {
             return { didFail: true, data: [] };
         }
 
@@ -40,11 +40,11 @@ export default class TodoService {
 
     //#region post
 
-    public async addNewTodo() : Promise<boolean> {
+    public async addNewTodo(body: {content: string}) : Promise<boolean> {
         let response = await Axios.request<boolean, AxiosResponse<boolean>>({
             url: URL
         })
-        return response.status == 200;
+        return response.status === 200;
     }
 
     //#endregion

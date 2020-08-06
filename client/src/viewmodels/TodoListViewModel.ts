@@ -20,10 +20,10 @@ export default class TodoListViewModel {
     @computed
     public get todosCount() { return this.todoItems.length }
 
-    public async addTodoItem() {
+    public async addTodoItem(content: string) {
         this.isAwaiting = true;
         
-
+        this.service.addNewTodo({content})
 
         this.isAwaiting = false;
     }
