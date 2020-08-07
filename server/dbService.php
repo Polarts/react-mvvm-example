@@ -10,7 +10,6 @@ class TodoServer {
     
     function __construct() {
         $this->connection = new mysqli($this->servername, $this->username, $this->password, $this->dbName);
-        header('Content-Type: application/json');
     } 
 
     function getAllTodos() {
@@ -26,6 +25,15 @@ class TodoServer {
         }
 
         return $dataRows;
+    }
+
+    function addNewTodo($todoContent) {
+        $sql = "INSERT INTO todoItems (content) VALUES ('".$todoContent->content."')";
+        $result = $this->connection->query($sql);
+
+        if ($result) {
+            return $this->connection->insert_id;
+        }
     }
 }
 

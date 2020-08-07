@@ -1,4 +1,5 @@
-export default interface ServerResponse<T> {
-    didFail: boolean,
-    data: T
+export default interface ServerResponseInterface<T> {
+    didFail : boolean,
+    failReason? : string,
+    data? : T 
 }

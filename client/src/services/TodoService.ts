@@ -1,8 +1,7 @@
-import Axios, { AxiosResponse } from 'axios';
 import TodoItem from '../models/TodoItem';
-import ServerResponse from './ServerResponseInterface';
+import ServerResponseInterface from './ServerResponseInterface';
 
-const URL = "https://premaxillary-grove.000webhostapp.com/";
+const url = "https://premaxillary-grove.000webhostapp.com/";
 
 export default class TodoService {
 
@@ -22,33 +21,47 @@ export default class TodoService {
 
     //#region get
 
-    public async getAllTodos() : Promise<ServerResponse<Array<TodoItem>>> {
+    public async getAllTodos() : Promise<ServerResponseInterface<Array<TodoItem>>> {
 
-        let response = await Axios.request<TodoItem, AxiosResponse<Array<TodoItem>>>({
-            url: URL,
-            responseType: "json"
-        });
+        try {
+            
+            let response = await fetch(url);
 
-        if (response.status !== 200) {
-            return { didFail: true, data: [] };
+            if (response.status !== 200) {
+                return { didFail: true, failReason: response.statusText };
+            }
+
+            var data = await response.json();
+            return { didFail: false, data };
+
+        } catch(e) {
+            return { didFail: false, failReason: String(e) };
         }
-
-        return { didFail: false, data: response.data };
     }
 
     //#endregion
 
     //#region post
 
-    public async addNewTodo(body: {content: string}) : Promise<boolean> {
-        let response = await Axios.request<boolean, AxiosResponse<boolean>>({
-            url: URL
-        })
-        return response.status === 200;
+    public async addNewTodo(body: {content : string}) : Promise<ServerResponseInterface<number>> {
+
+        try {
+            let response = await fetch(url, { method: 'post', body: JSON.stringify(body) });
+
+            if (response.status !== 200) {
+                return { didFail: true, failReason: response.statusText };
+            }
+
+            var data = await response.json();
+            return { didFail: false, data: data };
+
+        } catch (e) {
+            console.log(e);
+            return { didFail: true, failReason: String(e) };
+        }
     }
 
     //#endregion
 
     //#endregion
-
 }
