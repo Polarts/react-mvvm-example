@@ -12,7 +12,7 @@ export default observer(
         let [newItemText, setNewItemText] = useState('');
 
         useEffect(() => {
-            viewModel.initAsync();
+            viewModel.fetchTodoItems();
         }, []);
 
         function onInputChanged(e: React.FormEvent<HTMLInputElement>) {
@@ -35,7 +35,9 @@ export default observer(
                     {viewModel.isAwaiting
                         ? <span>Loading...</span> 
                         : <button onClick={onAddClicked}>Add</button>}
-                    {viewModel.didRequestFail? <span>{viewModel.failReason}</span> : null}
+                    {viewModel.didRequestFail
+                        ? <span>{viewModel.failReason}</span> 
+                        : null}
                 </div>
             </div>
         );

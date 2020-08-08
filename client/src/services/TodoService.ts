@@ -43,7 +43,7 @@ export default class TodoService {
 
     //#region post
 
-    public async addNewTodo(body: {content : string}) : Promise<ServerResponseInterface<number>> {
+    public async addNewTodo(body : {content : string}) : Promise<ServerResponseInterface<number>> {
 
         try {
             let response = await fetch(url, { method: 'post', body: JSON.stringify(body) });
@@ -53,13 +53,32 @@ export default class TodoService {
             }
 
             var data = await response.json();
-            return { didFail: false, data: data };
+            return { didFail: false, data };
 
         } catch (e) {
-            console.log(e);
             return { didFail: true, failReason: String(e) };
         }
     }
+
+    //#endregion
+
+    //#region put
+
+    public async updateTodo(body : {id: number, content?: string, isDone?: boolean}) : Promise<ServerResponseInterface<boolean>> {
+        try {
+            let response = await fetch(url, { method: 'put', body: JSON.stringify(body) });
+
+            if (response.status !== 200) {
+                return { didFail: true, failReason: response.statusText };
+            }
+
+            var data = await response.json();
+            return { didFail: false, data };
+
+        } catch (e) {
+            return { didFail: true, failReason: String(e) };
+        }
+    }    
 
     //#endregion
 

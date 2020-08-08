@@ -27,13 +27,39 @@ class TodoServer {
         return $dataRows;
     }
 
-    function addNewTodo($todoContent) {
-        $sql = "INSERT INTO todoItems (content) VALUES ('".$todoContent->content."')";
-        $result = $this->connection->query($sql);
+    function addNewTodo($updateObject) {
+        $statement = $this->connection->prepare("INSERT INTO todoItems (content) VALUES (?)");
+        $statement->bind_param("s", $content);
+        $content = $updateObject->content;
+        
+        $result = $statement->execute();
 
         if ($result) {
             return $this->connection->insert_id;
         }
+    }
+
+    function updateTodo($updateObject) {
+        $propsToUpdate = get_object_vars($updateObject);
+        $propsCount = count($propsToUpdate);
+        $propKeys = array_keys($propsToUpdate);
+
+        switch($propsCount) {
+            case 2:
+                $statement = $this->connection->prepare("UPDATE todoItems SET (?) VALUES (?)");
+                $type = gettype($propsToUpdate[1]) == "string"? "ss" : "si";
+                $statement->bind_params($type, $key, $param);
+                $param = $propsToUpdate[1];
+                $key = $propKeys[1];
+            break;
+
+            case 3:
+                $statement = $this->connection->prepare("UPDATE todoItems SET (?, ?) VALUES (?, ?)");
+                
+            break;
+        }
+
+        return $statement->execute();
     }
 }
 

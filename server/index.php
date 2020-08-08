@@ -20,7 +20,9 @@ switch($_SERVER['REQUEST_METHOD'])
     break;
 
     case 'PUT':
-
+        $json = file_get_contents('php://input');
+        $data = json_decode($json);
+        echo json_encode($todoServer->updateTodo($data));
     break;
 
     case 'DELETE':

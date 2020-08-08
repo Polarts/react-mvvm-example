@@ -1,72 +1,69 @@
-import {observable, computed} from 'mobx';
+import { observable, computed } from 'mobx';
 import TodoItem from '../models/TodoItem';
 import TodoService from '../services/TodoService';
+import PromiseAwareViewModelBase from './PromiseAwareViewModelBase';
+import TodoItemViewModel from './TodoItemViewModel';
 
-export default class TodoListViewModel {
-
-    //#region ctor & init
+export default class TodoListViewModel extends PromiseAwareViewModelBase {
 
     constructor(
         private service : TodoService
-    ) { }
+    ) { super() }
 
-    public async initAsync() {
-        this.isAwaiting = true;
-
-        var response = await this.service.getAllTodos();
-
-        if (response.didFail) {
-            this.didRequestFail = true;
-            this.failReason = response.failReason;
-        } else {
-            this.todoItems = response.data as Array<TodoItem>;
-        }
-
-        this.isAwaiting = false;
-    }
-
-    //#endregion
+    //#region properties
 
     @observable 
-    public todoItems : Array<TodoItem> = [];
-
-    //#region server communication states
-
-    @observable
-    public isAwaiting : boolean = false;
-
-    @observable
-    public didRequestFail : boolean = false;
-
-    @observable
-    public failReason? : string;
-
-    //#endregion
+    public todoItems : Array<TodoItemViewModel> = [];
 
     @computed
     public get todosCount() { return this.todoItems?.length ?? 0 }
 
-    public async addTodoItem(content: string) {
-        this.didRequestFail = false;
-        this.isAwaiting = true;
-        
-        var response = await this.service.addNewTodo({content});
+    //#endregion
 
-        if (response.didFail) {
-            this.didRequestFail = true;
-            this.failReason = response.failReason;
-        } else {
-            console.log(response.data);
-            this.todoItems.push(
-                new TodoItem(
-                    response.data as number, 
-                    content, 
-                    false
-                )
-            );
-        }
+    //#region methods
 
-        this.isAwaiting = false;
+    public async fetchTodoItems() {
+        await this.runWithAwareness(async () => {
+            var response = await this.service.getAllTodos();
+
+            if (response.didFail) {
+                this.didRequestFail = true;
+                this.failReason = response.failReason;
+            } else {
+                this.todoItems = (response.data as Array<TodoItem>).map(item => new TodoItemViewModel(this.service, item));
+            }
+        });
     }
+
+    public async addTodoItem(content: string) {
+        await this.runWithAwareness(async () => {
+            if (!content) {
+                this.didRequestFail = true;
+                this.failReason = 'Please provide content for your todo item!';
+                this.isAwaiting = false;
+                return;
+            }
+    
+            var response = await this.service.addNewTodo({content});
+    
+            if (response.didFail) {
+                this.didRequestFail = true;
+                this.failReason = response.failReason;
+            } else {
+                this.todoItems.push(
+                    new TodoItemViewModel(
+                        this.service,
+                        new TodoItem(
+                            response.data as number, 
+                            content, 
+                            false
+                        )
+                    )
+                );
+            }
+        });
+    }
+
+    //#endregion
 
 }
