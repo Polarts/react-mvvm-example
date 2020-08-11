@@ -3,11 +3,12 @@ import { observer } from 'mobx-react';
 import TodoItemViewModel from '../viewmodels/TodoItemViewModel';
 
 type TodoItemProps = {
-    viewModel: TodoItemViewModel
+    viewModel: TodoItemViewModel,
+    deleteItem: () => void
 }
 
 export default observer(
-    ({viewModel} : TodoItemProps) => {
+    ({viewModel, deleteItem} : TodoItemProps) => {
         
         const [isEditing, setIsEditing] = useState(false);
         const [content, setContent] = useState(viewModel.content);
@@ -22,9 +23,13 @@ export default observer(
 
         function onInputKeyUp(e: React.KeyboardEvent<HTMLInputElement>) {
             if (e.key === 'Enter') {
-                viewModel.updateContent(content);
-                setIsEditing(false);
+                update();   
             }
+        }
+
+        function update() {
+            viewModel.updateContent(content);
+            setIsEditing(false);
         }
 
         return (
@@ -37,6 +42,9 @@ export default observer(
                     : isEditing
                         ? <input onChange={onInputChanged} onKeyUp={onInputKeyUp} value={content}/>
                         : <span onClick={() => setIsEditing(true)}>{content}</span>}
+                {isEditing
+                    ? <button onClick={update}>Done</button>
+                    : <button onClick={deleteItem}>Delete</button>}
             </li>
         );
     }

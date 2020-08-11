@@ -64,6 +64,19 @@ export default class TodoListViewModel extends PromiseAwareViewModelBase {
         });
     }
 
+    public async deleteTodoItem(id: number) {
+        await this.runWithAwareness(async () => {
+            var response = await this.service.deleteTodo(id);
+
+            if (response.didFail) {
+                this.didRequestFail = true;
+                this.failReason = response.failReason;
+            } else {
+                this.todoItems = this.todoItems.filter(item => item.id !== id);
+            }
+        });
+    }
+
     //#endregion
 
 }

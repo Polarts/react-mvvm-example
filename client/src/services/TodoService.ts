@@ -1,7 +1,12 @@
 import TodoItem from '../models/TodoItem';
 import ServerResponseInterface from './ServerResponseInterface';
+import { Server } from 'http';
 
-const url = "https://premaxillary-grove.000webhostapp.com/";
+const url = "http://localhost:4963/todos";
+
+const headers = {
+    'Content-Type': 'application/json',
+}
 
 export default class TodoService {
 
@@ -25,9 +30,9 @@ export default class TodoService {
 
         try {
             
-            let response = await fetch(url);
+            let response = await fetch(url, { headers });
 
-            if (response.status !== 200) {
+            if (!response.ok) {
                 return { didFail: true, failReason: response.statusText };
             }
 
@@ -46,14 +51,14 @@ export default class TodoService {
     public async addNewTodo(body : {content : string}) : Promise<ServerResponseInterface<number>> {
 
         try {
-            let response = await fetch(url, { method: 'post', body: JSON.stringify(body) });
+            let response = await fetch(url, { method: 'post', body: JSON.stringify({...body, isDone: false}), headers });
 
-            if (response.status !== 200) {
+            if (!response.ok) {
                 return { didFail: true, failReason: response.statusText };
             }
 
-            var data = await response.json();
-            return { didFail: false, data };
+            var item : TodoItem = await response.json();
+            return { didFail: false, data: item.id };
 
         } catch (e) {
             return { didFail: true, failReason: String(e) };
@@ -64,21 +69,38 @@ export default class TodoService {
 
     //#region put
 
-    public async updateTodo(body : {id: number, content?: string, isDone?: boolean}) : Promise<ServerResponseInterface<boolean>> {
+    public async updateTodo(id: number, body : {content?: string, isDone?: boolean}) : Promise<ServerResponseInterface<undefined>> {
         try {
-            let response = await fetch(url, { method: 'put', body: JSON.stringify(body) });
+            let response = await fetch(`${url}/${id}`, { method: 'put', body: JSON.stringify(body), headers });
 
-            if (response.status !== 200) {
+            if (!response.ok) {
                 return { didFail: true, failReason: response.statusText };
             }
 
-            var data = await response.json();
-            return { didFail: false, data };
+            return { didFail: false };
 
         } catch (e) {
             return { didFail: true, failReason: String(e) };
         }
     }    
+
+    //#endregion
+
+    //#region delete
+
+    public async deleteTodo(id: number) : Promise<ServerResponseInterface<undefined>> {
+        try {
+            let response = await fetch(`${url}/${id}`, { method: 'delete', headers });
+
+            if (!response.ok) {
+                return { didFail: true, failReason: response.statusText };
+            }
+
+            return { didFail: false };
+        } catch (e) {
+            return { didFail: true, failReason: String(e) };
+        }
+    }
 
     //#endregion
 

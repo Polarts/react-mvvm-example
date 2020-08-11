@@ -29,7 +29,7 @@ export default observer(
             <div>
                 <h1>Todo Items: {viewModel.todosCount}</h1>
                 <ol>
-                    {viewModel.todoItems?.map(item => <TodoItem key={item.id} viewModel={item}/>)}
+                    {viewModel.todoItems?.map(item => <TodoItem key={item.id} viewModel={item} deleteItem={async () => await viewModel.deleteTodoItem(item.id)}/>)}
                 </ol>
                 <div>
                     <input type="text" value={newItemText} onChange={onInputChanged}/>
