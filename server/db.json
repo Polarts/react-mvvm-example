@@ -1,8 +1,9 @@
 {
   "todos": [
     {
-      "content": "There's a lot to be done...",
-      "id": 1
+        "id": 1,
+        "content": "There's a lot to be done...",
+        "isDone": false
     }
   ]
 }
